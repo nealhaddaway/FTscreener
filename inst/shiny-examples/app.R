@@ -3,6 +3,8 @@ library(shinyLP)
 library(synthesisr)
 library(knitr)
 
+source('buildGSlinks.R')
+
 
 # Define UI for application that draws a histogram
 ui <- navbarPage("Full Text Screener", id = "tabs",
@@ -36,13 +38,13 @@ ui <- navbarPage("Full Text Screener", id = "tabs",
                                    uiOutput('ref_display'),
                                    br()
                                    ),
-                            column(3,
+                            column(2,
                                    checkboxGroupInput(inputId = 'decisions',
                                                       label = '',
                                                       choices = ''
                                                       )
                                    ),
-                            column(9,
+                            column(10,
                                    htmlOutput('iframe')
                                    )
                           )
@@ -92,8 +94,10 @@ server <- function(input, output, session) {
         'Title: ', refs$title, br(),
         'Journal: ', refs$journal, br(),
         'Abstract: ', refs$abstract, br(),
-        a(href=paste0(refs$doi), refs$doi, target='iframe'),br(),
-        a(href=paste0(refs$url), refs$url, target='iframe'),br()
+        'Sci-Hub: ', a(href=rv$sci_hub, rv$sci_hub, target='iframe'),br(),
+        'DOI: ', a(href=paste0(refs$doi), refs$doi, target='_blank'),br(),
+        'URL: ', a(href=paste0(refs$url), refs$url, target='iframe'),br(),
+        'Google Scholar: ', a(href=buildGSlinks(and_terms = title)$link, buildGSlinks(and_terms = title)$link, target='_blank'),br()
       )
     })
 
@@ -114,7 +118,7 @@ server <- function(input, output, session) {
       refs4dois$doi <- gsub('www.doi.org/', '', refs4dois$doi)
 
       print(refs4dois$doi)
-
+      rv$sci_hub <- paste0('https://sci-hub.hkvisa.net/', refs4dois$doi)
       tags$iframe(src = paste0('https://sci-hub.hkvisa.net/', refs4dois$doi), width = '100%', height = 1500, name = 'iframe')
     })
 

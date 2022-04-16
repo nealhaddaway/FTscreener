@@ -5,7 +5,7 @@ account: estech
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6103274
-bundleId: 5804980
+bundleId: 5804998
 url: https://estech.shinyapps.io/shiny-examples/
-when: 1650118639.98793
-lastSyncTime: 1650118639.98795
+when: 1650119463.0412
+lastSyncTime: 1650119463.04122
