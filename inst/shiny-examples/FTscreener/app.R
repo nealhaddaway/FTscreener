@@ -52,8 +52,8 @@ ui <- navbarPage("Full Text Screener", id = "tabs",
 
                  tabPanel('Progress',
                           fluidRow(
-                            column(10,
-                                   ''
+                            column(12,
+                                   dataTableOutput('progress_table')
                                    )
                           )
                  )
@@ -67,6 +67,9 @@ server <- function(input, output, session) {
   #store uploaded references as a df using synthesisr
   observeEvent(input$upload_refs,{
     rv$refs <- synthesisr::read_refs(input$input_file$datapath)
+
+    #add decision columns
+    rv$refs$decisions <- ''
 
     rv$decision_options <- input$decision_options
     updateCheckboxGroupInput(session, 'decisions',
@@ -95,9 +98,9 @@ server <- function(input, output, session) {
         'Journal: ', refs$journal, br(),
         'Abstract: ', refs$abstract, br(),
         'Sci-Hub: ', a(href=rv$sci_hub, rv$sci_hub, target='iframe'),br(),
-        'DOI: ', a(href=paste0(refs$doi), refs$doi, target='_blank'),br(),
-        'URL: ', a(href=paste0(refs$url), refs$url, target='iframe'),br(),
-        'Google Scholar: ', a(href=buildGSlinks(and_terms = title)$link, buildGSlinks(and_terms = title)$link, target='_blank'),br()
+        'URL: ', a(href=refs$url, refs$url, target='iframe'),br(),
+        'DOI (new tab): ', a(href=refs$doi, refs$doi, target='_blank'),br(),
+        'Google Scholar (new tab): ', a(href=buildGSlinks(and_terms = refs$title)$link, buildGSlinks(and_terms = refs$title)$link, target='_blank'),br()
       )
     })
 
@@ -117,9 +120,8 @@ server <- function(input, output, session) {
       refs4dois$doi <- gsub('doi.org/', '', refs4dois$doi)
       refs4dois$doi <- gsub('www.doi.org/', '', refs4dois$doi)
 
-      print(refs4dois$doi)
       rv$sci_hub <- paste0('https://sci-hub.hkvisa.net/', refs4dois$doi)
-      tags$iframe(src = paste0('https://sci-hub.hkvisa.net/', refs4dois$doi), width = '100%', height = 1500, name = 'iframe')
+      tags$iframe(src = rv$sci_hub, width = '100%', height = 1500, name = 'iframe')
     })
 
 
@@ -130,12 +132,38 @@ server <- function(input, output, session) {
     updateNumericInput(session, 'start_from',
                        value = input$start_from - 1)
     rv$data <- rv$refs[input$start_from,]
+
+    #save decisions
+    rv$refs[input$start_from,]$decisions <- paste0(input$decisions, collapse = '; ')
+    updateCheckboxGroupInput(session, 'decisions',
+                             selected = unlist(strsplit(rv$refs[input$start_from-1,]$decisions, '; ')))
+    print(unlist(strsplit(rv$refs[input$start_from-1,]$decisions, '; ')))
   })
   #update record selection next
   observeEvent(input$next_rec, {
     updateNumericInput(session, 'start_from',
                        value = input$start_from + 1)
     rv$data <- rv$refs[input$start_from,]
+
+    #save decisions
+    rv$refs[input$start_from,]$decisions <- paste0(input$decisions, collapse = '; ')
+    updateCheckboxGroupInput(session, 'decisions',
+                             selected = unlist(strsplit(rv$refs[input$start_from+1,]$decisions, '; ')))
+    print(unlist(strsplit(rv$refs[input$start_from+1,]$decisions, '; ')))
+  })
+
+  #observeEvent(input$upload_refs, {
+  #  #update decisions made
+  #  print(rv$refs[input$start_from,]$decisions)
+  #  dec_lookup <- unlist(strsplit(rv$refs[input$start_from,]$decisions, '; '))
+  #  updateCheckboxGroupInput(session, 'decisions',
+  #                           selected = dec_lookup)
+  #})
+
+
+  #produce progress table
+  output$progress_table <- renderDataTable({
+    rv$refs
   })
 
 
