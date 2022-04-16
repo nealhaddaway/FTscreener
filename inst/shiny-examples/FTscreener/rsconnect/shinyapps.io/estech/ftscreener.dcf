@@ -5,7 +5,7 @@ account: estech
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6103333
-bundleId: 5805052
+bundleId: 5805466
 url: https://estech.shinyapps.io/ftscreener/
-when: 1650121368.38249
-lastSyncTime: 1650121368.3825
+when: 1650137306.78753
+lastSyncTime: 1650137306.78754
